@@ -1,6 +1,6 @@
 from google.cloud import secretmanager
 
-class googleSecrets():
+class google_secrets():
 
     def __init__(self, project_id):
         # GCP project in which to store secrets in Secret Manager.
