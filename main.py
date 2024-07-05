@@ -1,14 +1,14 @@
-from telethon import TelegramClient, events, errors
+import os
 import logging
 import configparser
-
+from telethon import TelegramClient, events, errors
 from gsecrets import google_secrets
 from slots import check_slots_availability
 
 # Read config
 config = configparser.ConfigParser()
 config.read('config.ini')
-googleSecrets_project = config['telegram']['googleSecrets_project']
+google_secrets_project = config['telegram']['googleSecrets_project']
 bot_name = config['telegram']['bot_name']
 source_group_name = config['telegram']['source_group']
 
@@ -16,17 +16,31 @@ source_group_name = config['telegram']['source_group']
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create Telegram clients
-gsm = google_secrets(googleSecrets_project)
-api_id = gsm.read_secret("api_id")
-api_hash = gsm.read_secret("api_hash")
-bot_token = gsm.read_secret(bot_name + "_token")
-broadcast_channel_chat_id = int(gsm.read_secret("private_channel_chat_id"))
+# Function to get secret from environment variables or Secret Manager
+def get_env_or_secret(secret_id):
+    if os.getenv('ENV') == 'LOCAL':
+        gsm = google_secrets(google_secrets_project)
+        return gsm.read_secret(secret_id)
+    value = os.getenv(secret_id)
+    if value is None:
+        raise RuntimeError(f"Required environment variable {secret_id} is not set.")
+    return value
 
+# Fetch secrets
+phone = get_env_or_secret("phone_number")
+api_id = get_env_or_secret("api_id")
+api_hash = get_env_or_secret("api_hash")
+bot_token = get_env_or_secret(bot_name + "_token")
+broadcast_channel_chat_id = int(get_env_or_secret("private_channel_chat_id"))
+
+# Create Telegram clients
 client = TelegramClient('session_name', api_id, api_hash)
 bot_client = TelegramClient('bot_session', api_id, api_hash).start(bot_token=bot_token)
 
 async def main():
+
+    await client.start(phone)
+
     try:
         # Get the entity of the source group by its username or ID
         source_group = await client.get_entity(source_group_name)
@@ -44,6 +58,7 @@ async def main():
         logger.error(f'An unexpected error occurred: {e}')
         return
 
+    #async for message in client.iter_messages(source_group, limit=200):
     @client.on(events.NewMessage(chats=source_group))
     async def handler(event):
         message = event.message
