@@ -70,6 +70,8 @@ async def main():
     @client.on(events.NewMessage(chats=source_group))
     async def handler(event):
         message = event.message
+        if message.message:
+            logger.info(f"Processing message {message.message}")
         if not message.silent and message.message != '' and check_slots_availability(message.message):
             try:
                 # Send a message to the target channel
