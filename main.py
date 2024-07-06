@@ -98,7 +98,7 @@ async def main():
             message_counter += 1
             
     try:
-        logger.info('Listening for new messages...')
+        logger.info(f'Listening for new messages on {source_group_name}...')
         await client.run_until_disconnected()
     except KeyboardInterrupt:
         logger.info('Keyboard interrupt received. Exiting gracefully...')
