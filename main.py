@@ -76,8 +76,13 @@ async def main():
         else:
             logger.info(f"❌Discarding message: {message.message}")
             
-    print('Listening for new messages...')
-    await client.run_until_disconnected()
+    try:
+        logger.info('Listening for new messages...')
+        await client.run_until_disconnected()
+    except KeyboardInterrupt:
+        logger.info('Keyboard interrupt received. Exiting gracefully...')
+        await client.disconnect()
+
 
 # Run the client
 with client:
