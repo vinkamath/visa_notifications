@@ -6,8 +6,6 @@ from telethon import TelegramClient, events, errors
 from dotenv import load_dotenv
 
 from slots import check_slots_availability
-from health import run_health_check_server
-from session import get_client_session
 
 load_dotenv()
 
@@ -38,9 +36,6 @@ api_id = get_secret_from_env("api_id")
 api_hash = get_secret_from_env("api_hash")
 bot_token = get_secret_from_env(bot_name + "_token")
 broadcast_channel_chat_id = int(get_secret_from_env("private_channel_chat_id"))
-
-# Use session files
-get_client_session(client_session_path)
 
 # Use the original paths for creating the clients
 client = TelegramClient(client_session_path, api_id, api_hash).start(phone)
@@ -83,17 +78,8 @@ async def main():
         else:
             logger.info(f"❎Discarding message: {message.message}")
             
-
     print('Listening for new messages...')
     await client.run_until_disconnected()
-
-# Determine the port to listen on
-port = int(os.getenv('PORT', default_port))
-
-# Start the health check server in a separate thread
-health_check_thread = threading.Thread(target=run_health_check_server, args=(port,))
-health_check_thread.daemon = True
-health_check_thread.start()
 
 # Run the client
 with client:
