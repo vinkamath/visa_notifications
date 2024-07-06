@@ -14,6 +14,7 @@ protobuf==4.25.3
 pyaes==1.6.1
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
+python-dotenv==1.0.1
 requests==2.32.3
 rsa==4.9
 Telethon==1.36.0

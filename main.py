@@ -3,11 +3,14 @@ import logging
 import configparser
 import threading
 from telethon import TelegramClient, events, errors
+from dotenv import load_dotenv
 
 from gsecrets import google_secrets
 from slots import check_slots_availability
 from health import run_health_check_server
 from session import get_client_session
+
+load_dotenv()
 
 # Read config
 config = configparser.ConfigParser()
@@ -21,7 +24,7 @@ client_session_path = config['telegram']['client_session_name']
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__name_')
 
 # Function to get secret from environment variables or Secret Manager
 def get_env_or_secret(secret_id):
@@ -71,7 +74,7 @@ async def main():
     async def handler(event):
         message = event.message
         if message.message:
-            logger.info(f"Processing message {message.message}")
+            logger.info(f"Processing message: {message.message}")
         if not message.silent and message.message != '' and check_slots_availability(message.message):
             try:
                 # Send a message to the target channel
@@ -81,6 +84,9 @@ async def main():
                 logger.error(f'Flood wait error when forwarding message. Please wait for {e.seconds} seconds.')
             except Exception as e:
                 logger.error(f'Failed to forward message: {e}')
+        else:
+            logger.info(f"❎Discarding message: {message.message}")
+            
 
     print('Listening for new messages...')
     await client.run_until_disconnected()
