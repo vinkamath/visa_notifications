@@ -14,7 +14,6 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 bot_name = config['telegram']['bot_name']
 source_group_name = config['telegram']['source_group']
-default_port = config['telegram'].getint('port', 8080)
 bot_session_path = config['telegram']['bot_session_name']
 client_session_path = config['telegram']['client_session_name']
 
