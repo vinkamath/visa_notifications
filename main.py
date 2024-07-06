@@ -5,7 +5,6 @@ import threading
 from telethon import TelegramClient, events, errors
 from dotenv import load_dotenv
 
-from gsecrets import google_secrets
 from slots import check_slots_availability
 from health import run_health_check_server
 from session import get_client_session
@@ -27,21 +26,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('__name_')
 
 # Function to get secret from environment variables or Secret Manager
-def get_env_or_secret(secret_id):
-    if os.getenv('ENV') == 'LOCAL':
-        gsm = google_secrets(google_secrets_project)
-        return gsm.read_secret(secret_id)
+def get_secret_from_env(secret_id):
     value = os.getenv(secret_id)
     if value is None:
         raise RuntimeError(f"Required environment variable {secret_id} is not set.")
     return value
 
 # Fetch secrets
-phone = get_env_or_secret("phone_number")
-api_id = get_env_or_secret("api_id")
-api_hash = get_env_or_secret("api_hash")
-bot_token = get_env_or_secret(bot_name + "_token")
-broadcast_channel_chat_id = int(get_env_or_secret("private_channel_chat_id"))
+phone = get_secret_from_env("phone_number")
+api_id = get_secret_from_env("api_id")
+api_hash = get_secret_from_env("api_hash")
+bot_token = get_secret_from_env(bot_name + "_token")
+broadcast_channel_chat_id = int(get_secret_from_env("private_channel_chat_id"))
 
 # Use session files
 get_client_session(client_session_path)
@@ -79,7 +75,7 @@ async def main():
             try:
                 # Send a message to the target channel
                 await bot_client.send_message(entity=broadcast_channel_chat_id, message=message.message, silent=False)
-                logger.debug(f"Message {message.message} forwarded to the target group.")
+                logger.info(f"✅Message {message.message} forwarded to the target group.")
             except errors.FloodWaitError as e:
                 logger.error(f'Flood wait error when forwarding message. Please wait for {e.seconds} seconds.')
             except Exception as e:
