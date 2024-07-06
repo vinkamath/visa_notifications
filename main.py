@@ -1,25 +1,28 @@
 import os
 import logging
 import configparser
-import threading
+import asyncio
 from telethon import TelegramClient, events, errors
 from dotenv import load_dotenv
 
 from slots import check_slots_availability
 
+# Read environment variables from .env file
 load_dotenv()
 
 # Read config
 config = configparser.ConfigParser()
 config.read('config.ini')
 bot_name = config['telegram']['bot_name']
+heartbeat_interval_hours = int(config['telegram']['heartbeat_interval_hours'])
 source_group_name = config['telegram']['source_group']
 bot_session_path = config['telegram']['bot_session_name']
 client_session_path = config['telegram']['client_session_name']
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('__name_')
+logger = logging.getLogger(__name__)
+message_counter = 0
 
 # Function to get secret from environment variables or Secret Manager
 def get_secret_from_env(secret_id):
@@ -39,7 +42,20 @@ broadcast_channel_chat_id = int(get_secret_from_env("private_channel_chat_id"))
 client = TelegramClient(client_session_path, api_id, api_hash).start(phone)
 bot_client = TelegramClient(bot_session_path, api_id, api_hash).start(bot_token=bot_token)
 
+async def send_heartbeat():
+    global message_counter
+    while True:
+        await asyncio.sleep(heartbeat_interval_hours * 3600)
+        heartbeat_message = f"I ignored {message_counter} messages in the last {heartbeat_interval_hours} hours."
+        try:
+            await bot_client.send_message(entity=broadcast_channel_chat_id, message=heartbeat_message, silent=True)
+            logger.info(f"Heartbeat message sent: {heartbeat_message}")
+            message_counter = 0  # Reset the counter after sending the heartbeat
+        except Exception as e:
+            logger.error(f"Failed to send heartbeat message: {e}")
+
 async def main():
+    global message_counter
 
     try:
         # Get the entity of the source group by its username or ID
@@ -58,9 +74,13 @@ async def main():
         logger.error(f'An unexpected error occurred: {e}')
         return
 
+    # Schedule the heartbeat task
+    asyncio.create_task(send_heartbeat())
+
     #async for message in client.iter_messages(source_group, limit=200):
     @client.on(events.NewMessage(chats=source_group))
     async def handler(event):
+        global message_counter
         message = event.message
         if message.message:
             logger.info(f"Processing message: {message.message}")
@@ -75,6 +95,7 @@ async def main():
                 logger.error(f'Failed to forward message: {e}')
         else:
             logger.info(f"❌Discarding message: {message.message}")
+            message_counter += 1
             
     try:
         logger.info('Listening for new messages...')
@@ -82,6 +103,7 @@ async def main():
     except KeyboardInterrupt:
         logger.info('Keyboard interrupt received. Exiting gracefully...')
         await client.disconnect()
+        client.loop.stop()
 
 
 # Run the client
