@@ -12,7 +12,6 @@ load_dotenv()
 # Read config
 config = configparser.ConfigParser()
 config.read('config.ini')
-google_secrets_project = config['telegram']['googleSecrets_project']
 bot_name = config['telegram']['bot_name']
 source_group_name = config['telegram']['source_group']
 default_port = config['telegram'].getint('port', 8080)
@@ -76,7 +75,7 @@ async def main():
             except Exception as e:
                 logger.error(f'Failed to forward message: {e}')
         else:
-            logger.info(f"❎Discarding message: {message.message}")
+            logger.info(f"❌Discarding message: {message.message}")
             
     print('Listening for new messages...')
     await client.run_until_disconnected()
