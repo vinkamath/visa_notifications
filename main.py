@@ -1,6 +1,7 @@
 import os
 import logging
 import configparser
+import argparse
 import asyncio
 import datetime
 from telethon import TelegramClient, errors
@@ -10,9 +11,18 @@ from slots import check_slots_availability
 
 load_dotenv()
 
+# Parse arguments
+parser = argparse.ArgumentParser(description='Telegram Bot for checking slots availability.')
+parser.add_argument('--test', default='config.ini', action='store_true', help='Use test_config.ini instead of config.ini')
+args = parser.parse_args()
+
 # Read config
 config = configparser.ConfigParser()
-config.read('config.ini')
+config_file = 'test_config.ini' if args.test else 'config.ini'
+if os.path.exists(config_file):
+    config.read(config_file)
+else:
+     raise FileNotFoundError(f"Config file '{config_file}' not found.")
 bot_name = config['telegram']['bot_name']
 heartbeat_interval_hours = int(config['telegram']['heartbeat_interval_hours'])
 message_fetch_interval_seconds = int(config['telegram']['message_fetch_interval_seconds'])  # Fetch interval in seconds
@@ -45,6 +55,7 @@ async def fetch_messages(client, bot_client, source_group):
     message_counter = 0
     heartbeat_interval_seconds = heartbeat_interval_hours * 3600
     last_heartbeat_time = asyncio.get_event_loop().time()
+    logger.info(f"Starting to fetch messages from {source_group_name}...")
 
     try:
         while True:
@@ -64,13 +75,13 @@ async def fetch_messages(client, bot_client, source_group):
                     try:
                         # Send a message to the target channel
                         await bot_client.send_message(entity=broadcast_channel_chat_id, message=message.message, silent=False)
-                        logger.info(f"✅Message {message.message} forwarded to the target group.")
+                        logger.info(f"✅ {message.message}")
                     except errors.FloodWaitError as e:
                                         logger.error(f'Flood wait error when forwarding message. Please wait for {e.seconds} seconds.')
                     except Exception as e:
                                         logger.error(f'Failed to forward message: {e}')
                 else:
-                    logger.info(f"❌Discarding message: {message.message}")
+                    logger.info(f"❌ {message.message}")
                     message_counter += 1
 
             # Update the last processed message ID to the latest one from this batch
