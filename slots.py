@@ -30,6 +30,18 @@ def check_slots_availability(message):
         r'available on',
         r'available now',
         r'yes',
+        r'jan',
+        r'feb',
+        r'mar',
+        r'apr',
+        r'may',
+        r'jun',
+        r'jul',
+        r'aug',
+        r'sep',
+        r'oct',
+        r'nov',
+        r'dec'
     ]
 
     # Convert the message to lowercase for case insensitive matching
