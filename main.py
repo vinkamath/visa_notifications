@@ -42,6 +42,7 @@ broadcast_channel_chat_id = int(get_secret_from_env("private_channel_chat_id"))
 async def fetch_messages(client, bot_client, source_group):
     global message_counter
     last_message_id = 0
+    message_counter = 0
     heartbeat_interval_seconds = heartbeat_interval_hours * 3600
     last_heartbeat_time = asyncio.get_event_loop().time()
 
