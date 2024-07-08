@@ -38,7 +38,6 @@ def check_slots_availability(message):
     # Check if any of the negative patterns match
     for pattern in unavailable_patterns:
         if re.search(pattern, message_lower):
-            print(f"No slots available. Matched anti-pat {pattern}")
             return False # No slots available, do nothing
 
     # Check if any of the patterns match
