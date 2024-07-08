@@ -13,7 +13,7 @@ load_dotenv()
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='Telegram Bot for checking slots availability.')
-parser.add_argument('--test', default='config.ini', action='store_true', help='Use test_config.ini instead of config.ini')
+parser.add_argument('--test', action='store_true', help='Use test_config.ini instead of config.ini')
 args = parser.parse_args()
 
 # Read config
