@@ -56,5 +56,3 @@ def check_slots_availability(message):
     for pattern in available_patterns:
         if re.search(pattern, message_lower):
             return True
-
-    print("No matching pattern") 
