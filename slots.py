@@ -4,15 +4,16 @@ def check_slots_availability(message):
     if not message:
         return False
 
-    # Define patterns that indicate no slots are available
+    # Define patterns that indicate no slots are available. 
+    # Use word boundaries for whole word matches.
     unavailable_patterns = [
-        r'no slots available',
-        r'no slots',
-        r'na all',
-        r'na',
-        r'n\.a\.',
-        r'n/a',
-        r'not available'
+        r'\bno slots available\b',
+        r'\bno slots\b',
+        r'\bna all\b',
+        r'\bna\b',
+        r'\bn\.a\.\b',
+        r'\bn/a\b',
+        r'\bnot available\b'
     ]
     # Define patterns that indicate slots are available
     available_patterns = [
@@ -43,3 +44,5 @@ def check_slots_availability(message):
     for pattern in available_patterns:
         if re.search(pattern, message_lower):
             return True
+
+    print("No matching pattern") 
