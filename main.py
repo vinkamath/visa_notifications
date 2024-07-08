@@ -54,7 +54,7 @@ async def fetch_messages(client, bot_client, source_group):
             messages_read = 0  # Initialize message count
             new_last_message_id = last_message_id  # Temporary ID to track the latest message ID in the batch
 
-            async for message in client.iter_messages(source_group, offset_id=last_message_id, limit=200):
+            async for message in client.iter_messages(source_group, min_id=last_message_id, limit=200):
                 if message.id <= last_message_id:
                     continue
                 messages_read += 1  # Increment message count
