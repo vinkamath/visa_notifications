@@ -29,6 +29,7 @@ message_fetch_interval_seconds = int(config['telegram']['message_fetch_interval_
 source_group_name = config['telegram']['source_group']
 bot_session_path = config['telegram']['bot_session_name']
 client_session_path = config['telegram']['client_session_name']
+floodwait_delay = config['telegram'].getint('floodwait_delay', 5)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -64,25 +65,38 @@ async def fetch_messages(client, bot_client, source_group):
 
             messages_read = 0  # Initialize message count
             new_last_message_id = last_message_id  # Temporary ID to track the latest message ID in the batch
+            messages = []
 
-            async for message in client.iter_messages(source_group, min_id=last_message_id, limit=200):
+            async for message in client.iter_messages(source_group, min_id=last_message_id, limit=10):
                 if message.id <= last_message_id:
+                    logger.info(f"Skipping older message #{message.id}. Last message ID {last_message_id}")
                     continue
                 messages_read += 1  # Increment message count
                 new_last_message_id = max(new_last_message_id, message.id)  # Update temporary latest message ID
 
                 if not message.silent and message.message != '' and check_slots_availability(message.message):
-                    try:
-                        # Send a message to the target channel
-                        await bot_client.send_message(entity=broadcast_channel_chat_id, message=message.message, silent=False)
-                        logger.info(f"✅ {message.message}")
-                    except errors.FloodWaitError as e:
-                                        logger.error(f'Flood wait error when forwarding message. Please wait for {e.seconds} seconds.')
-                    except Exception as e:
-                                        logger.error(f'Failed to forward message: {e}')
+                    messages.append(message)
                 else:
-                    logger.info(f"❌ {message.message}")
+                    logger.info(f"❌ #{message.id}: {message.message}")
                     message_counter += 1
+        
+            count = 0
+            while messages:
+                message = messages.pop()
+                try:
+                    # Send a message to the target channel
+                    if count == floodwait_delay:
+                        count = 0
+                        logger.info(f"Waiting for {floodwait_delay} seconds")
+                        await asyncio.sleep(floodwait_delay)
+                    await bot_client.send_message(entity=broadcast_channel_chat_id, message=message.message, silent=False)
+                    logger.info(f"✅ #{message.id} {message.message}")
+                except errors.FloodWaitError as e:
+                    logger.error(f'Flood wait error when forwarding message. Please wait for {e.seconds} seconds.')
+                except Exception as e:
+                    logger.error(f'Failed to forward message: {e}')
+                count += 1
+
 
             # Update the last processed message ID to the latest one from this batch
             last_message_id = new_last_message_id
@@ -93,7 +107,7 @@ async def fetch_messages(client, bot_client, source_group):
             # Check if it's time to send a heartbeat
             current_time = asyncio.get_event_loop().time()
             if current_time - last_heartbeat_time >= heartbeat_interval_seconds:
-                heartbeat_message = f"I ignored {message_counter} messages in the last {heartbeat_interval_hours} hours."
+                heartbeat_message = f"*I ignored {message_counter} messages in the last {heartbeat_interval_hours} hours.*"
                 try:
                     await bot_client.send_message(entity=broadcast_channel_chat_id, message=heartbeat_message, silent=True)
                     logger.info(f"Heartbeat message sent: {heartbeat_message}")
