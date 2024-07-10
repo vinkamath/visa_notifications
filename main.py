@@ -8,6 +8,7 @@ from telethon import TelegramClient, errors
 from dotenv import load_dotenv
 
 from slots import check_slots_availability
+from state import write_state, read_state
 
 load_dotenv()
 
@@ -30,10 +31,11 @@ source_group_name = config['telegram']['source_group']
 bot_session_path = config['telegram']['bot_session_name']
 client_session_path = config['telegram']['client_session_name']
 floodwait_delay = config['telegram'].getint('floodwait_delay', 5)
+state_file_path = config['telegram'].get('state_file_path', fallback='state_file.txt')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('__name_')
+logger = logging.getLogger('__name__')
 
 # Function to get secret from environment variables or Secret Manager
 def get_secret_from_env(secret_id):
@@ -52,7 +54,8 @@ broadcast_channel_chat_id = int(get_secret_from_env("private_channel_chat_id"))
 # Newly provided fetch_messages function
 async def fetch_messages(client, bot_client, source_group):
     global message_counter
-    last_message_id = 0
+    state = read_state(state_file_path)
+    last_message_id = state.get('last_message_id', 0)
     message_counter = 0
     heartbeat_interval_seconds = heartbeat_interval_hours * 3600
     last_heartbeat_time = asyncio.get_event_loop().time()
@@ -91,12 +94,13 @@ async def fetch_messages(client, bot_client, source_group):
                         await asyncio.sleep(floodwait_delay)
                     await bot_client.send_message(entity=broadcast_channel_chat_id, message=message.message, silent=False)
                     logger.info(f"✅ #{message.id} {message.message}")
+                    last_message_id = message.id  # Update the last processed message ID
+                    write_state(state_file_path, {'last_message_id': last_message_id})  # Write state after each message
                 except errors.FloodWaitError as e:
                     logger.error(f'Flood wait error when forwarding message. Please wait for {e.seconds} seconds.')
                 except Exception as e:
                     logger.error(f'Failed to forward message: {e}')
                 count += 1
-
 
             # Update the last processed message ID to the latest one from this batch
             last_message_id = new_last_message_id
