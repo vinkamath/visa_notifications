@@ -24,18 +24,17 @@ if os.path.exists(config_file):
     config.read(config_file)
 else:
      raise FileNotFoundError(f"Config file '{config_file}' not found.")
-bot_name = config['telegram']['bot_name']
 heartbeat_interval_hours = int(config['telegram']['heartbeat_interval_hours'])
 message_fetch_interval_seconds = int(config['telegram']['message_fetch_interval_seconds'])  # Fetch interval in seconds
 source_group_name = config['telegram']['source_group']
 bot_session_path = config['telegram']['bot_session_name']
 client_session_path = config['telegram']['client_session_name']
 floodwait_delay = config['telegram'].getint('floodwait_delay', 5)
-state_file_path = config['telegram'].get('state_file_path', fallback='state_file.txt')
+state_file_path = config['telegram'].get('state_file_path', 'state_file.txt')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('__name__')
+logger = logging.getLogger(__name__)
 
 # Function to get secret from environment variables or Secret Manager
 def get_secret_from_env(secret_id):
@@ -48,6 +47,7 @@ def get_secret_from_env(secret_id):
 phone = get_secret_from_env("phone_number")
 api_id = get_secret_from_env("api_id")
 api_hash = get_secret_from_env("api_hash")
+bot_name = get_secret_from_env("bot_name")
 bot_token = get_secret_from_env(bot_name + "_token")
 broadcast_channel_chat_id = int(get_secret_from_env("private_channel_chat_id"))
 
