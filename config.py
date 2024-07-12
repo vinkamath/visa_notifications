@@ -12,9 +12,9 @@ class AppConfig():
 			raise FileNotFoundError(f"Config file '{config_file}' not found.")
 
 		self.config.read(config_file)
-		self._load_config()
+		self._load_config(args)
 
-	def _load_config(self) -> None:
+	def _load_config(self, args: Namespace) -> None:
 		try:
 			self.heartbeat_interval_hours = self.config['telegram'].getint('heartbeat_interval_hours', 4)
 			self.message_fetch_interval_seconds = self.config['telegram'].getint('message_fetch_interval_seconds', 60)
@@ -24,6 +24,8 @@ class AppConfig():
 			self.source_group_name = self.config['telegram']['source_group']
 			self.bot_session_path = self.config['telegram'].get('bot_session_name', 'bot_session')
 			self.state_file_path = self.config['telegram'].get('state_file_path', 'state_file.txt')
+			if args.test:
+				self.state_file_path = 'test_' + self.state_file_path
 			self.client_session_path = self.config['telegram'].get('client_session_name', 'client_session')
 		except KeyError as e:
 			raise KeyError(f"Missing required configuration: {e}")

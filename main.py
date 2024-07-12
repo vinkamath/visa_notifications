@@ -38,7 +38,7 @@ class App:
         global message_counter
         state = read_state(self.config.state_file_path)
         last_message_id = state.get('last_message_id', 0)
-        self.logger.info(f"Read message ID {last_message_id} from f{self.config.state_file_path}")
+        self.logger.info(f"Read message ID {last_message_id} from {self.config.state_file_path}")
         message_counter = 0
         heartbeat_interval_seconds = self.config.heartbeat_interval_hours * 3600
         last_heartbeat_time = asyncio.get_event_loop().time()
@@ -75,7 +75,7 @@ class App:
                             count = 0
                             self.logger.info(f"Waiting for {self.config.floodwait_delay} seconds")
                             await asyncio.sleep(self.config.floodwait_delay)
-                        await bot_client.send_message(entity=self.config.broadcast_channel_chat_id, message=message.message, silent=False)
+                        await bot_client.send_message(entity=self.secrets.broadcast_channel_chat_id, message=message.message, silent=False)
                         self.logger.info(f"✅ #{message.id} {message.message}")
                         last_message_id = message.id  # Update the last processed message ID
                         write_state(self.config.state_file_path, {'last_message_id': last_message_id})  # Write state after each message
@@ -96,7 +96,7 @@ class App:
                 if current_time - last_heartbeat_time >= heartbeat_interval_seconds:
                     heartbeat_message = f"*I ignored {message_counter} messages in the last {self.config.heartbeat_interval_hours} hours.*"
                     try:
-                        await bot_client.send_message(entity=self.config.broadcast_channel_chat_id, message=heartbeat_message, silent=True)
+                        await bot_client.send_message(entity=self.secrets.broadcast_channel_chat_id, message=heartbeat_message, silent=True)
                         self.logger.info(f"Heartbeat message sent: {heartbeat_message}")
                         message_counter = 0  # Reset the counter after sending the heartbeat
                         last_heartbeat_time = current_time
