@@ -1,6 +1,6 @@
 # Visa Notifications
 If you're an H1B applicant, you're probably familiar with the pain of constantly checking the USCIS website for visa appointment slots.
-There are numerous Telegram groups where users report whether or not visa appointment slots are currently available. However,they are very noisy. Active groups seen over 500 messages a day, 99% of which indicate the inavailability of appointment slots. The groups are noisier when slots become available.
+There are numerous Telegram groups where users report whether or not visa appointment slots are currently available. However, they are very noisy. Active groups see over 500 messages a day, 99% of which indicate the unavailability of appointment slots - aka the infamous "NA ALL". No appointments available across all visa appointment centers. The groups are noisier when slots become available.
 
 This is a Telegram bot that filters out the noise and will notify you via your own private channel if a slot opens up. Because bots are not allowed to join groups, you can use a user account to fetch messages from the group. **You don't have to admitted to these groups to use this bot.**
 
