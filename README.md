@@ -13,7 +13,7 @@ You can contact me if you would like to use this bot. Or you can choose to host 
 2. Because you will be using a user account to fetch messages from the group, you will also need to get the API ID and API hash from [Telegram](https://core.telegram.org/api/obtaining_api_id).
 3. If you want to use a private channel to receive notifications, you will need to get its [channel ID](https://neliosoftware.com/content/help/how-do-i-get-the-channel-id-in-telegram/).
 
-### Runnning the bot
+### Running the bot
 1. Clone this repository.
 2. Install the dependencies using `pip install -r requirements.txt`.
 3. Create a `.env` file in the root directory of the project. Add the following variables to the `.env` file:
