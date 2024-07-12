@@ -63,7 +63,7 @@ class App:
                         messages.append(message)
                     else:
                         self.logger.info(f"❌ #{message.id}: {message.message}")
-                        message_counter += 1
+                        self.message_counter += 1
             
                 count = 0
                 while messages:
