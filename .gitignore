@@ -1,8 +1,10 @@
 env/
 __pycache__
 .DS_Store
+launch.json
 
 *.session
 creds/
 .env
 state_file.txt
+test*
