@@ -15,7 +15,7 @@ class App:
     def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
         self.secrets = None
-        self.config = None
+        self.message_counter = 0
 
     def init_app(self) -> None:
         # Load secrets from .env file
@@ -33,9 +33,8 @@ class App:
         # Configure logging
         logging.basicConfig(level=logging.INFO)
 
-# Newly provided fetch_messages function
-    async def fetch_messages(self, client, bot_client, source_group):
-        global message_counter
+    async def fetch_messages(self, client: TelegramClient, bot_client: TelegramClient, source_group: Any) -> None:
+        """Fetch messages from the source group and forward relevant messages to the broadcast channel."""
         state = read_state(self.config.state_file_path)
         last_message_id = state.get('last_message_id', 0)
         self.logger.info(f"Read message ID {last_message_id} from {self.config.state_file_path}")
@@ -94,11 +93,10 @@ class App:
                 # Check if it's time to send a heartbeat
                 current_time = asyncio.get_event_loop().time()
                 if current_time - last_heartbeat_time >= heartbeat_interval_seconds:
-                    heartbeat_message = f"*I ignored {message_counter} messages in the last {self.config.heartbeat_interval_hours} hours.*"
+                    heartbeat_message = f"*I ignored {self.message_counter} messages in the last {self.config.heartbeat_interval_hours} hours.*"
                     try:
-                        await bot_client.send_message(entity=self.secrets.broadcast_channel_chat_id, message=heartbeat_message, silent=True)
                         self.logger.info(f"Heartbeat message sent: {heartbeat_message}")
-                        message_counter = 0  # Reset the counter after sending the heartbeat
+                        self.message_counter = 0  # Reset the counter after sending the heartbeat
                         last_heartbeat_time = current_time
                     except Exception as e:
                         self.logger.error(f"Failed to send heartbeat message: {e}")
