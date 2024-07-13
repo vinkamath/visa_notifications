@@ -2,6 +2,7 @@ import logging
 import argparse
 import asyncio
 import datetime
+
 from typing import Any
 from telethon import TelegramClient, errors
 from dotenv import load_dotenv
@@ -51,7 +52,7 @@ class App:
 
         try:
             while True:
-                current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                current_time = datetime.datetime.now(tz=self.config.timezone).strftime('%Y-%m-%d %H:%M:%S')
                 self.logger.info(f"Starting to fetch messages at {current_time}...")
 
                 messages_read = 0  # Initialize message count
@@ -93,7 +94,7 @@ class App:
                 # Update the last processed message ID to the latest one from this batch
                 last_message_id = new_last_message_id
 
-                current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                current_time = datetime.datetime.now(tz=self.config.timezone).strftime('%Y-%m-%d %H:%M:%S')
                 self.logger.info(f"Finished fetching messages at {current_time}. Total messages read: {messages_read}")
 
                 # Check if it's time to send a heartbeat
