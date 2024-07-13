@@ -95,6 +95,7 @@ class App:
                 if current_time - last_heartbeat_time >= heartbeat_interval_seconds:
                     heartbeat_message = f"*I ignored {self.message_counter} messages in the last {self.config.heartbeat_interval_hours} hours.*"
                     try:
+                        await bot_client.send_message(entity=self.secrets.broadcast_channel_chat_id, message=heartbeat_message, silent=True)
                         self.logger.info(f"Heartbeat message sent: {heartbeat_message}")
                         self.message_counter = 0  # Reset the counter after sending the heartbeat
                         last_heartbeat_time = current_time
