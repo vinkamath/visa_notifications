@@ -11,7 +11,7 @@ You can contact me if you would like to use this bot. Or you can choose to host 
 ### Pre-requisites
 1. You will first have to [create a bot](https://telegram.me/BotFather) and get the API token. 
 2. Because you will be using a user account to fetch messages from the group, you will also need to get the API ID and API hash from [Telegram](https://core.telegram.org/api/obtaining_api_id).
-3. If you want to use a private channel to receive notifications, you will need to get its [channel ID](https://neliosoftware.com/content/help/how-do-i-get-the-channel-id-in-telegram/).
+3. If you want to use a private channel to receive notifications, you will need to get its channel ID. The easiest way to do this is by forwarding a message from this channel to [@JsonDumpBot](https://stackoverflow.com/a/45577616).
 
 ### Running the bot
 1. Clone this repository.
@@ -21,7 +21,8 @@ You can contact me if you would like to use this bot. Or you can choose to host 
     api_id=12345678
 	api_hash='12345a3a34a5eb6eecb620amg28g4393'
 	phone_number='+11234567890'
-	smart_h1b_appt_notification_bot_token='123457893:AAGFebpOBm20bn0GS8T3oeC0K34mKIIoGog'
+	bot_name='smart_h1b_appt_notification_bot'
+	bot_token='123457893:AAGFebpOBm20bn0GS8T3oeC0K34mKIIoGog'
 	private_channel_chat_id=-1002982281657
    ```
 4. Run the bot using `python main.py`.
