@@ -18,6 +18,8 @@ class AppConfig():
 
 		self._load_config()
 
+		self.print_config()
+
 	def _load_config(self) -> None:
 		try:
 			self.heartbeat_interval_hours = self.config['telegram'].getint('heartbeat_interval_hours', 4)
@@ -32,6 +34,14 @@ class AppConfig():
 			self.state_file_path = self.config['telegram'].get('state_file_path', 'state_file.txt')
 			if self.test_mode:
 				self.state_file_path = 'test_' + self.state_file_path
+				self.heartbeat_interval_seconds = self.config['telegram'].getint('heartbeat_interval_seconds', 20)
 			self.client_session_path = self.config['telegram'].get('client_session_name', 'client_session')
 		except KeyError as e:
 			raise KeyError(f"Missing required configuration: {e}")
+
+	def print_config(self) -> None: 
+		print(" === Configuration ===") 
+		for attr, value in self.__dict__.items(): 
+			if attr != 'config':  # Exclude the configparser object itself from being printed 
+				print(f"{attr}: {value}")
+		print(" === Configuration ===") 
