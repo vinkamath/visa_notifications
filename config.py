@@ -1,12 +1,15 @@
 import configparser
 import os
 import pytz 
+import logging
 from typing import Any
 from argparse import Namespace
 
 
 class AppConfig():
 	def __init__(self, args: Namespace):
+		self.logger = logging.getLogger(__name__)
+		logging.basicConfig(level=logging.INFO)
 		self.config = configparser.ConfigParser()
 
 		config_file = 'test_config.ini' if args.test else 'config.ini'
@@ -17,7 +20,6 @@ class AppConfig():
 		self.test_mode = args.test
 
 		self._load_config()
-
 		self.print_config()
 
 	def _load_config(self) -> None:
@@ -40,8 +42,8 @@ class AppConfig():
 			raise KeyError(f"Missing required configuration: {e}")
 
 	def print_config(self) -> None: 
-		print(" === Configuration ===") 
+		self.logger.info(" === Configuration ===") 
 		for attr, value in self.__dict__.items(): 
-			if attr != 'config':  # Exclude the configparser object itself from being printed 
-				print(f"{attr}: {value}")
-		print(" === Configuration ===") 
+			if attr not in ['config', 'logger']:  
+				self.logger.info(f" {attr}: {value}")
+		self.logger.info(" === Configuration ===") 
