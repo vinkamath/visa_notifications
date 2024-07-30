@@ -4,6 +4,10 @@ def check_slots_availability(message):
     if not message:
         return False
 
+    # Check if the message is a single sentence ending with a question mark
+    if message.strip().endswith('?') and len(re.findall(r'\.', message)) <= 1:
+        return False
+
     # Define patterns that indicate no slots are available. 
     # Use word boundaries for whole word matches.
     unavailable_patterns = [
@@ -15,6 +19,7 @@ def check_slots_availability(message):
         r'\bn/a\b',
         r'\bnot available\b'
     ]
+    
     # Define patterns that indicate slots are available
     available_patterns = [
         r'available',
@@ -56,3 +61,5 @@ def check_slots_availability(message):
     for pattern in available_patterns:
         if re.search(pattern, message_lower):
             return True
+
+    return False
