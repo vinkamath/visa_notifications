@@ -41,7 +41,10 @@ class App:
         last_message_id = state.get('last_message_id', 0)
         self.logger.info(f"Read message ID {last_message_id} from {self.config.state_file_path}")
 
-        heartbeat_interval_seconds = self.config.heartbeat_interval_hours * 3600
+        if self.config.test_mode:
+            heartbeat_interval_seconds = self.config.heartbeat_interval_seconds
+        else:
+            heartbeat_interval_seconds = self.config.heartbeat_interval_hours * 3600
         last_heartbeat_time = asyncio.get_event_loop().time()
         if self.config.test_mode:
             self.logger.info(f"❗Running in test mode ❗")
@@ -93,6 +96,10 @@ class App:
 
                 # Update the last processed message ID to the latest one from this batch
                 last_message_id = new_last_message_id
+                if self.config.heartbeat_interval_hours > 1:
+                    time_unit = "hours"
+                else:
+                    time_unit = "hour"
 
                 current_time = datetime.datetime.now(tz=self.config.timezone).strftime('%Y-%m-%d %H:%M:%S')
                 self.logger.info(f"Finished fetching messages at {current_time}. Total messages read: {messages_read}")
@@ -100,7 +107,7 @@ class App:
                 # Check if it's time to send a heartbeat
                 current_time = asyncio.get_event_loop().time()
                 if current_time - last_heartbeat_time >= heartbeat_interval_seconds:
-                    heartbeat_message = f"*I ignored {self.message_counter} messages in the last {self.config.heartbeat_interval_hours} hours.*"
+                    heartbeat_message = f"🙅 {self.message_counter} messages in {self.config.heartbeat_interval_hours} {time_unit}"
                     try:
                         await bot_client.send_message(entity=target_channel, message=heartbeat_message, silent=True)
                         self.logger.info(f"Heartbeat message sent: {heartbeat_message}")
